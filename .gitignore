@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[oc]
+
+# Virtual environment
+.venv/
+
+# Secrets (API keys) - commit .env.example instead
+.env
+
+# Real receipts used for evals (may contain personal data)
+evals/dataset/
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
