@@ -1,0 +1,25 @@
+{
+  "name": "receipt-extractor",
+  "build": { "dockerfile": "Dockerfile" },
+  "remoteUser": "vscode",
+  // Rootless Podman needs DEVCONTAINER_USERNS=keep-id on the host so "vscode" owns the
+  // mounted files. Docker doesn't support keep-id, so it falls back to "host" (its default).
+  "runArgs": ["--userns=${localEnv:DEVCONTAINER_USERNS:host}"],
+  "containerEnv": {
+    "HOME": "/home/vscode",
+    // Keep the Linux venv out of the mounted project so it doesn't clash with the host one.
+    "UV_PROJECT_ENVIRONMENT": "/home/vscode/.venv",
+    "UV_PYTHON_PREFERENCE": "only-system",
+    "UV_LINK_MODE": "copy"
+  },
+  "postCreateCommand": "uv sync",
+  "forwardPorts": [8000],
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "ms-python.vscode-pylance"],
+      "settings": {
+        "python.defaultInterpreterPath": "/home/vscode/.venv/bin/python"
+      }
+    }
+  }
+}

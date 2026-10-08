@@ -1,0 +1,2 @@
+# Normalize line endings to LF: code runs in a Linux container, also from Windows
+* text=auto eol=lf
