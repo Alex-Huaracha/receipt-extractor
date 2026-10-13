@@ -20,7 +20,7 @@ Ejemplos de comprobantes que debe soportar: una boleta de supermercado en Perú,
 - **Prepara el archivo** antes de enviarlo: endereza la imagen, reduce su tamaño para gastar menos y convierte el PDF en imágenes.
 - **Extrae los datos** con un modelo de IA con visión (Gemini al inicio). El diseño permite cambiar de proveedor sin tocar el resto del sistema.
 - **Detecta el país y la moneda** del comprobante.
-- **Valida los datos** con reglas genéricas (que los montos cuadren) y, si el país es conocido, con reglas de ese país.
+- **Valida que los datos sean coherentes** entre sí (que los montos cuadren con el total).
 - **Reintenta una vez** si la validación encuentra un error, indicándole a la IA qué no cuadró.
 - **Avisa cuando algo no está bien** (`needs_review: true`) en vez de inventar datos. Si un campo no se puede leer, queda vacío (`null`).
 - **Informa el costo** de cada extracción (tokens usados).
@@ -137,32 +137,24 @@ Los impuestos son una **lista**, no un campo fijo, porque cada país los llama d
 
 1. Si quien llama al servicio lo indica (`POST /receipts/extract?country=PE`), se usa ese país y además se le pasa al modelo como contexto.
 2. Si no, el modelo lo deduce de las pistas del comprobante: palabras como "RUC" o "IGV", la moneda (`S/`), la dirección, el idioma.
-3. Si no hay pistas suficientes, `country` queda en `null` y solo se aplican las reglas genéricas.
+3. Si no hay pistas suficientes, `country` queda en `null`.
 
 ---
 
 ## 6. Reglas de validación
 
-### Genéricas (para cualquier comprobante)
+Las validaciones comprueban que los datos extraídos sean coherentes entre sí, para cualquier comprobante.
 
 | Regla | Si no se cumple |
 |---|---|
 | Debe tener fecha, emisor y total | Error |
-| Subtotal − descuento + envío + impuestos + propina = total | Error |
-| La suma de los ítems cuadra con el subtotal | Advertencia |
-| El monto de cada impuesto ≈ tasa × base (si se conoce la tasa) | Advertencia |
+| Los montos cuadran con el total (el impuesto puede estar sumado o incluido en los precios; el descuento, restado al final o ya aplicado) | Error |
+| En cada ítem: cantidad × precio unitario − descuento = total del ítem | Advertencia |
+| La suma de los ítems cuadra con el subtotal o el total | Advertencia |
 | La fecha no está en el futuro | Advertencia |
-| `country` y `currency` son códigos ISO válidos | Advertencia |
+| `country` y `currency` tienen formato de código ISO | Advertencia |
 
-Los montos se comparan con una pequeña tolerancia (por ejemplo ±0.05), porque los comprobantes redondean a 2 decimales.
-
-### Por país (solo si se conoce el país)
-
-| País | Regla | Si no se cumple |
-|---|---|---|
-| Perú (`PE`) | El RUC del emisor es válido (11 dígitos y dígito verificador correcto) | Error |
-
-Más países se pueden agregar después sin cambiar las reglas genéricas.
+Los montos se comparan con una pequeña tolerancia (±0.05), porque los comprobantes redondean a 2 decimales.
 
 Si hay al menos un **error**, el resultado sale con `needs_review: true`.
 
@@ -213,7 +205,7 @@ Si hay al menos un **error**, el resultado sale con `needs_review: true`.
 
 - [x] Proyecto creado con FastAPI y endpoint `/health`
 - [x] Formato de los datos (esquema genérico)
-- [ ] Validaciones (genéricas + Perú)
+- [x] Validaciones de coherencia
 - [ ] Preparación del archivo (imagen y PDF)
 - [ ] Conexión con Gemini
 - [ ] Endpoint `/receipts/extract` completo
