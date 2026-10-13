@@ -17,7 +17,8 @@ Ejemplos de comprobantes que debe soportar: una boleta de supermercado en Perú,
 ## 2. Qué hace
 
 - **Recibe una imagen** (JPG, PNG) **o un PDF**.
-- **Prepara el archivo** antes de enviarlo: endereza la imagen, reduce su tamaño para gastar menos y convierte el PDF en imágenes.
+- **Prepara el archivo** antes de enviarlo: gira la foto según cómo se tomó, reduce su tamaño para gastar menos, borra sus metadatos (como la ubicación GPS) y convierte el PDF en imágenes.
+- **Rechaza archivos fuera de los límites**: más de 10 MB, PDF de más de 3 páginas o formato no soportado.
 - **Extrae los datos** con un modelo de IA con visión (Gemini al inicio). El diseño permite cambiar de proveedor sin tocar el resto del sistema.
 - **Detecta el país y la moneda** del comprobante.
 - **Valida que los datos sean coherentes** entre sí (que los montos cuadren con el total).
@@ -170,8 +171,8 @@ Si hay al menos un **error**, el resultado sale con `needs_review: true`.
 | **Pydantic** | Definir la forma del JSON y validar tipos (viene con FastAPI) |
 | **pydantic-settings** | Leer la configuración y la API key desde el archivo `.env` |
 | **Gemini** (`google-genai`) | Modelo de IA que lee el comprobante. Diseñado para poder cambiarlo por otro proveedor |
-| **Pillow** | Enderezar y reducir el tamaño de la imagen |
-| **PyMuPDF** | Convertir PDF en imágenes (y leer su texto, si lo tiene) |
+| **Pillow** | Girar y reducir el tamaño de la imagen |
+| **pypdfium2** | Convertir PDF en imágenes (licencia libre, a diferencia de PyMuPDF que es AGPL) |
 | **pytest** | Pruebas automáticas |
 | **Docker** | Empaquetar el servicio para ejecutarlo en cualquier lugar |
 
@@ -206,7 +207,7 @@ Si hay al menos un **error**, el resultado sale con `needs_review: true`.
 - [x] Proyecto creado con FastAPI y endpoint `/health`
 - [x] Formato de los datos (esquema genérico)
 - [x] Validaciones de coherencia
-- [ ] Preparación del archivo (imagen y PDF)
+- [x] Preparación del archivo (imagen y PDF)
 - [ ] Conexión con Gemini
 - [ ] Endpoint `/receipts/extract` completo
 - [ ] Medición de calidad (evals) y comparación de enfoques
